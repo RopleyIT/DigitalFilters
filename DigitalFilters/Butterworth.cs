@@ -96,18 +96,27 @@ namespace DigitalFilters
             {
                 ComplexPoly poly = new();
                 poly.Coefficients.Add(1);
-                poly.Coefficients.Add(1 / CutOff);
+                poly.Coefficients.Add(1);
                 Polynomials[polyCount - 1] = poly;
             }
             for (int i = 1; i <= Order/2; i++)
             {
                 var pole = Pole(i);
                 ComplexPoly poly = new();
-                poly.Coefficients.Add(pole.Real * pole.Real + pole.Imaginary * pole.Imaginary);
-                poly.Coefficients.Add(-2 * pole.Real / CutOff);
-                poly.Coefficients.Add(1 / (CutOff * CutOff));
+                poly.Coefficients.Add(1);
+                poly.Coefficients.Add(-2 * pole.Real);
+                poly.Coefficients.Add(1);
                 Polynomials[i-1] = poly;
             }
+        }
+
+        public Complex OutputAtFrequency(double angularFrequency)
+        {
+            Complex wNormalised = new Complex(0, angularFrequency / CutOff);
+            Complex result = Complex.One;
+            foreach (ComplexPoly p in Polynomials)
+                result *= p.Value(wNormalised);
+            return result;
         }
     }
 }

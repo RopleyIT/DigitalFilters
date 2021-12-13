@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DigitalFilters;
 using System.Numerics;
+using System;
 
 namespace DigitalFilterTests
 {
@@ -73,22 +74,35 @@ namespace DigitalFilterTests
         public void DCGainCorrect()
         {
             Butterworth bw = new(9, 1, false);
-            Complex w = Complex.Zero;
-            Complex v = Complex.One;
-            foreach (ComplexPoly p in bw.Polynomials)
-                v *= p.Value(w);
+            Complex v = bw.OutputAtFrequency(0);
             Assert.AreEqual(1.0, v.Real, 0.001);
             Assert.AreEqual(0.0, v.Imaginary, 0.001);
         }
 
         [TestMethod]
-        public void GainAtCutoffCorrect()
+        public void DCGainCorrectAtFreq()
+        {
+            Butterworth bw = new(9, 1000*Math.PI, false); // 500Hz cutoff
+            Complex v = bw.OutputAtFrequency(0);
+            Assert.AreEqual(1.0, v.Real, 0.001);
+            Assert.AreEqual(0.0, v.Imaginary, 0.001);
+        }
+
+        [TestMethod]
+        public void GainAtUnitCutoffCorrect()
         {
             Butterworth bw = new(7, 1, false);
-            Complex w = Complex.ImaginaryOne;
-            Complex v = Complex.One;
-            foreach (ComplexPoly p in bw.Polynomials)
-                v *= p.Value(w);
+            double w = 1;
+            Complex v = bw.OutputAtFrequency(w);
+            Assert.AreEqual(1.414, v.Magnitude, 0.001);
+        }
+
+        [TestMethod]
+        public void GainAtCutoffCorrect()
+        {
+            Butterworth bw = new(7, 1000*Math.PI, false);
+            double w = 1;
+            Complex v = bw.OutputAtFrequency(1000*Math.PI);
             Assert.AreEqual(1.414, v.Magnitude, 0.001);
         }
     }
