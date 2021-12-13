@@ -23,23 +23,52 @@ namespace DigitalFilters
             CutOff = cutOff;
             SamplingRate = samplingRate;
             HighPass = highPass;
-            CoeffX = new double[3];
-            CoeffY = new double[2];
+            CoeffX = new double[DenomPoly.Order + 1];
+            CoeffY = new double[DenomPoly.Order];
             InitCoefficients();
         }
 
         private void InitCoefficients()
         {
-            // First calculate the prewarping required for the cutoff frequency
+            // Calculate bilinear Z prewarping factor
 
-            double C = Math.Tan(CutOff /(2 * SamplingRate));
+            double C = Math.Tan(CutOff / (2 * SamplingRate));
+            if (DenomPoly.Order == 2)
+                InitSecondOrder(C);
+            else if (DenomPoly.Order == 1)
+                InitFirstOrder(C);
+            else
+                throw new ArgumentException
+                    ("Only first and second order polynomials permitted");
+        }
+
+        private void InitFirstOrder(double C)
+        {
+            double b0 = HighPass ? 0 : 1;   // T(s) numerator offset coeff
+            double b1 = HighPass ? 1 : 0;   // T(s) numerator coeff of s
+            double a1 = DenomPoly.Coefficients[1].Real; // T(s) denom coeff of s
+            double a0 = DenomPoly.Coefficients[0].Real; // T(s) denom offsett coeff
+
+            // Calculate denominator for each term in filter coefficients
+
+            double denom = a1 + a0 * C;
+
+            // Now calculate each of the coefficients themselves
+
+            CoeffX[0] = (b0 * C + b1) / denom;      // Coeff of x[n]
+            CoeffX[1] = (b0 * C - b1) / denom;      // Coeff of x[n-1]
+            CoeffY[0] = -(a0 * C - a1) / denom;     // Coeff of y[n-1]
+        }
+
+        private void InitSecondOrder(double C)
+        {
             double b0 = HighPass ? 0 : 1;   // T(s) numerator offset coeff
             double b2 = HighPass ? 1 : 0;   // T(s) numerator coeff of s*2
             double a2 = DenomPoly.Coefficients[2].Real; // T(s) denom coeff of s*s
             double a1 = DenomPoly.Coefficients[1].Real; // T(s) denom coeff of s
             double a0 = DenomPoly.Coefficients[0].Real; // T(s) denom offsett coeff
 
-            // Calculate denominator of gain factor for each coefficient
+            // Calculate denominator for each term in filter coefficients
 
             double denom = a2 + (a1 + a0 * C) * C;
 
