@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 namespace DigitalFilters
 {
-    public class Butterworth
+    public class Butterworth : IFilter
     {
         /// <summary>
         /// True for a high pass filter, false
@@ -32,6 +32,15 @@ namespace DigitalFilters
         public double CutOff { get; init; }
 
         /// <summary>
+        /// The set of second order and first order polynomials
+        /// representing the filter. These 2nd and 1st order
+        /// filters are cascaded to obtain the overall 
+        /// Butterworth filter.
+        /// </summary>
+
+        public IReadOnlyList<ComplexPoly> Polynomials { get; private set; }
+
+        /// <summary>
         /// Construct a Butterworth filter
         /// </summary>
         /// <param name="order">The order of the
@@ -41,13 +50,13 @@ namespace DigitalFilters
         /// <param name="hiPass">Set true
         /// if this is to be a high pass filter
         /// </param>
-        
+
         public Butterworth(int order, double cutOff, bool hiPass)
         {
             Order = order;
             CutOff = cutOff;
             HighPass = hiPass;
-            InitPolynomials();
+            Polynomials = InitPolynomials();
         }
 
         /// <summary>
@@ -71,6 +80,7 @@ namespace DigitalFilters
         /// <param name="index"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
+        
         public Complex Pole(int index)
         {
             if (index < 0 || index > Order)
@@ -79,26 +89,9 @@ namespace DigitalFilters
             return new Complex(Math.Cos(angle), Math.Sin(angle));
         }
 
-        /// <summary>
-        /// The set of second order and first order polynomials
-        /// representing the filter. These 2nd and 1st order
-        /// filters are cascaded to obtain the overall 
-        /// Butterworth filter.
-        /// </summary>
-        
-        public ComplexPoly[] Polynomials { get; private set; }
-
-        private void InitPolynomials()
+        private IReadOnlyList<ComplexPoly> InitPolynomials()
         {
-            var polyCount = (Order + 1) / 2;
-            Polynomials = new ComplexPoly[polyCount];
-            if((Order & 1) != 0)
-            {
-                ComplexPoly poly = new();
-                poly.Coefficients.Add(1);
-                poly.Coefficients.Add(1);
-                Polynomials[polyCount - 1] = poly;
-            }
+            var polynomials = new List<ComplexPoly>();
             for (int i = 1; i <= Order/2; i++)
             {
                 var pole = Pole(i);
@@ -106,13 +99,21 @@ namespace DigitalFilters
                 poly.Coefficients.Add(1);
                 poly.Coefficients.Add(-2 * pole.Real);
                 poly.Coefficients.Add(1);
-                Polynomials[i-1] = poly;
+                polynomials.Add(poly);
             }
+            if((Order & 1) != 0)
+            {
+                ComplexPoly poly = new();
+                poly.Coefficients.Add(1);
+                poly.Coefficients.Add(1);
+                polynomials.Add(poly);
+            }
+            return polynomials;
         }
 
         public Complex OutputAtFrequency(double angularFrequency)
         {
-            Complex wNormalised = new Complex(0, angularFrequency / CutOff);
+            Complex wNormalised = new(0, angularFrequency / CutOff);
             Complex result = Complex.One;
             foreach (ComplexPoly p in Polynomials)
                 result *= p.Value(wNormalised);

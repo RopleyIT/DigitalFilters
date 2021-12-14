@@ -12,7 +12,7 @@ namespace DigitalFilterTests
         public void FirstOrderPolynomialsCorrect()
         {
             Butterworth bw = new(1, 1, false);
-            Assert.AreEqual(1, bw.Polynomials.Length);
+            Assert.AreEqual(1, bw.Polynomials.Count);
             Assert.AreEqual(2, bw.Polynomials[0].Coefficients.Count);
             Assert.AreEqual(1.0, bw.Polynomials[0].Coefficients[0].Real);
             Assert.AreEqual(0.0, bw.Polynomials[0].Coefficients[0].Imaginary);
@@ -22,7 +22,7 @@ namespace DigitalFilterTests
         public void SecondOrderPolynomialsCorrect()
         {
             Butterworth bw = new(2, 1, false);
-            Assert.AreEqual(1, bw.Polynomials.Length);
+            Assert.AreEqual(1, bw.Polynomials.Count);
             Assert.AreEqual(3, bw.Polynomials[0].Coefficients.Count);
             Assert.AreEqual(1.0, bw.Polynomials[0].Coefficients[0].Real);
             Assert.AreEqual(0.0, bw.Polynomials[0].Coefficients[0].Imaginary);
@@ -36,7 +36,7 @@ namespace DigitalFilterTests
         public void ThirdOrderPolynomialsCorrect()
         {
             Butterworth bw = new(3, 1, false);
-            Assert.AreEqual(2, bw.Polynomials.Length);
+            Assert.AreEqual(2, bw.Polynomials.Count);
             Assert.AreEqual(2, bw.Polynomials[1].Coefficients.Count);
             Assert.AreEqual(1.0, bw.Polynomials[1].Coefficients[0].Real);
             Assert.AreEqual(0.0, bw.Polynomials[1].Coefficients[0].Imaginary);
@@ -53,7 +53,7 @@ namespace DigitalFilterTests
         public void TenthOrderPolynomialsCorrect()
         {
             Butterworth bw = new(10, 1, false);
-            Assert.AreEqual(5, bw.Polynomials.Length);
+            Assert.AreEqual(5, bw.Polynomials.Count);
             Assert.AreEqual(3, bw.Polynomials[0].Coefficients.Count);
             Assert.AreEqual(1.0, bw.Polynomials[0].Coefficients[0].Real);
             Assert.AreEqual(0.0, bw.Polynomials[0].Coefficients[0].Imaginary);
@@ -92,8 +92,7 @@ namespace DigitalFilterTests
         public void GainAtUnitCutoffCorrect()
         {
             Butterworth bw = new(7, 1, false);
-            double w = 1;
-            Complex v = bw.OutputAtFrequency(w);
+            Complex v = bw.OutputAtFrequency(1);
             Assert.AreEqual(1.414, v.Magnitude, 0.001);
         }
 
@@ -101,7 +100,6 @@ namespace DigitalFilterTests
         public void GainAtCutoffCorrect()
         {
             Butterworth bw = new(7, 1000*Math.PI, false);
-            double w = 1;
             Complex v = bw.OutputAtFrequency(1000*Math.PI);
             Assert.AreEqual(1.414, v.Magnitude, 0.001);
         }

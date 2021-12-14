@@ -8,7 +8,7 @@ namespace DigitalFilters
 {
     public class ComplexPoly
     {
-        public static readonly ComplexPoly ZeroPoly = new ComplexPoly();
+        public static readonly ComplexPoly ZeroPoly = new();
 
         public List<Complex> Coefficients { get; init; } = new();
 
@@ -51,9 +51,9 @@ namespace DigitalFilters
                     return;
         }
 
-        private ComplexPoly Clone()
+        public ComplexPoly Clone()
         {
-            ComplexPoly result = new ComplexPoly();
+            ComplexPoly result = new();
             for (int i = 0;i <= Order;i++)
                 result.Coefficients.Add(Coefficients[i]);
             return result;
