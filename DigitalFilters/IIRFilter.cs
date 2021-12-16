@@ -16,6 +16,12 @@ namespace DigitalFilters
     public class IIRFilter
     {
         /// <summary>
+        /// Gain factor applied to filter output samples
+        /// </summary>
+
+        public double Gain { get; init; }
+
+        /// <summary>
         /// The sampling rate for the digital filter, in Hz
         /// </summary>
         
@@ -44,10 +50,11 @@ namespace DigitalFilters
         /// <param name="samplingRate">The digital sampling rate
         /// for the digital filter</param>
         
-        public IIRFilter(IFilter analogueFilter, double samplingRate)
+        public IIRFilter(IFilter analogueFilter, double samplingRate, double gain = 1)
         {
             SamplingRate = samplingRate;
             AnalogueFilter = analogueFilter;
+            Gain = gain;
             FilterStages = new(AnalogueFilter.Polynomials.Count);
             InitFilterStages();
         }
@@ -164,7 +171,7 @@ namespace DigitalFilters
             IEnumerable<double> sink = source;
             foreach (var stage in FilterStages)
                 sink = AddFilterStage(stage, sink);
-            return sink;
+            return sink.Select(s => s * Gain);
         }
     }
 }
