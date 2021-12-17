@@ -15,7 +15,7 @@ namespace DigitalFilterTests
             double[] samples = new double[1024];
             for (int i = 0; i < 1024; i++)
                 samples[i] = 100 * Math.Sin(2 * Math.PI * i / 1024.0);
-            Complex[] outputSamples = fft.Transform(samples);
+            Complex[] outputSamples = fft.ForwardTransform(samples);
             Assert.AreEqual(-51200, outputSamples[1].Imaginary, 0.00001);
             Assert.AreEqual(0, outputSamples[1].Real, 0.00001);
             Assert.AreEqual(0, outputSamples[0].Real, 0.00001);
@@ -32,7 +32,7 @@ namespace DigitalFilterTests
             double[] samples = new double[16];
             for (int i = 0; i < 16; i++)
                 samples[i] = 100 * Math.Sin(2 * Math.PI * i / 16.0);
-            Complex[] outputSamples = fft.Transform(samples);
+            Complex[] outputSamples = fft.ForwardTransform(samples);
             Assert.AreEqual(-800, outputSamples[1].Imaginary, 0.00001);
             Assert.AreEqual(0, outputSamples[2].Real, 0.00001);
             Assert.AreEqual(0, outputSamples[0].Real, 0.00001);
@@ -49,7 +49,7 @@ namespace DigitalFilterTests
             double[] samples = new double[1024];
             for (int i = 0; i < 1024; i++)
                 samples[i] = 100;
-            Complex[] outputSamples = fft.Transform(samples);
+            Complex[] outputSamples = fft.ForwardTransform(samples);
             Assert.AreEqual(102400, outputSamples[0].Real, 0.00001);
             Assert.AreEqual(0, outputSamples[2].Imaginary, 0.00001);
             Assert.IsTrue(!outputSamples.Skip(1).Take(511)
@@ -64,12 +64,52 @@ namespace DigitalFilterTests
             double[] samples = new double[1024];
             for (int i = 0; i < 1024; i++)
                 samples[i] = 100 * Math.Sin(2 * Math.PI * i / 1024.0);
-            Complex[] outputSamples = fft.Transform(samples);
+            Complex[] outputSamples = fft.ForwardTransform(samples);
             Complex[] inverseSamples = fft.Transform(outputSamples, true);
             for (int i = 0; i < 1024; i++)
             {
                 Assert.AreEqual(samples[i], inverseSamples[i].Real, 0.00001);
                 Assert.AreEqual(0, inverseSamples[i].Imaginary, 0.00001);
+            }
+        }
+
+        static Random random = new Random();
+        private double Gaussian()
+        {
+            double v = 0;
+            for (int i = 0; i < 8192; i++)
+                v += 2 * random.NextDouble() - 1;
+            return v;
+        }
+
+        [TestMethod]
+        public void WhiteNoise()
+        {
+            FastFourierTransform fft = new(10);
+            double[] samples = new double[1024];
+            for (int i = 1; i < 1024; i++)
+                samples[i] = Gaussian();
+            Complex[] outputSamples = fft.ForwardTransform(samples);
+            Complex[] inverseSamples = fft.Transform(outputSamples, true);
+            for (int i = 0; i < 1024; i++)
+            {
+                Assert.AreEqual(samples[i], inverseSamples[i].Real, 0.00001);
+                Assert.AreEqual(0, inverseSamples[i].Imaginary, 0.00001);
+            }
+        }
+
+        [TestMethod]
+        public void SmallWhiteNoise()
+        {
+            FastFourierTransform fft = new(4);
+            double[] samples = new double[16];
+            for (int i = 1; i < 16; i++)
+                samples[i] = Gaussian();
+            Complex[] outputSamples = fft.ForwardTransform(samples);
+            double[] inverseSamples = fft.InverseTransform(outputSamples);
+            for (int i = 0; i < 16; i++)
+            {
+                Assert.AreEqual(samples[i], inverseSamples[i], 0.00001);
             }
         }
     }

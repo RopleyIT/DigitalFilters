@@ -94,9 +94,48 @@ namespace DigitalFilters
         /// <returns>The sequence representing the computed
         /// transform</returns>
 
-        public Complex[] Transform(double[] input)
+        public Complex[] ForwardTransform(double[] input)
         {
             return Transform(input.Select(r => new Complex(r, 0)).ToArray(), false);
+        }
+
+        /// <summary>
+        /// Perform an inverse Fourier transform from frequency to
+        /// time domain
+        /// </summary>
+        /// <param name="input">The set of complex frequency/phase
+        /// samples to transfirm back to the time domain. If this is
+        /// the same length as expected in the constructor, the
+        /// complex frequency samples are expected to be paired,
+        /// i.e. sample[length-i] is the complex conjugate of
+        /// sample[i]. This is necessary to produce all real
+        /// time domain samples after the inverse transform
+        /// has been applied. Alternatively, the array of
+        /// frequency samples can be half length + 1, in which
+        /// case the algorithm will reconstruct the second
+        /// half of the sample set so that they do obey the
+        /// property described above.</param>
+        /// <returns>The time domain waveform</returns>
+        /// <exception cref="ArgumentException">Thrown if
+        /// the number of samples in the frequency domain
+        /// does not match the expectations described above.
+        /// </exception>
+        
+        public double[] InverseTransform(Complex[] input)
+        {
+            Complex[] freqSamples;
+            if (input.Length == TwiddleFactors.Length)
+                freqSamples = input;
+            else if (input.Length == 1 + TwiddleFactors.Length / 2)
+            {
+                freqSamples = new Complex[TwiddleFactors.Length];
+                Array.Copy(input, freqSamples, input.Length);
+                for (int i = 1; i < TwiddleFactors.Length / 2; i++)
+                    freqSamples[^i] = Complex.Conjugate(freqSamples[i]);
+            }
+            else
+                throw new ArgumentException("Inverse transform sample count incorrect");
+            return Transform(freqSamples, true).Select(s => s.Real).ToArray();
         }
 
         /// <summary>
@@ -114,7 +153,7 @@ namespace DigitalFilters
         /// <exception cref="ArgumentException">Thrown if the number of
         /// samples passed to the transform method does not match the
         /// number of samples established by the constructor</exception>
-        
+
         public Complex[] Transform(Complex[] input, bool inverse)
         {
             if (input.Length != TwiddleFactors.Length)
@@ -173,6 +212,7 @@ namespace DigitalFilters
             else
                 return TwiddleFactors[i];
         }
+
         private static void Butterfly(ref Complex upper, ref Complex lower, Complex w)
         {
             Complex wq = lower * w;
