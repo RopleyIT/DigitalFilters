@@ -126,13 +126,13 @@ namespace SvgPlotter
             var transformedPoints =
                 from p in points
                 select TransformPt(p, bounds, scale);
-            var path = svgImage.AddPolyline(transformedPoints, penColor, 3);
+            var path = svgImage.AddPolyline(transformedPoints, penColor, 2);
             path.Cap = LineCap.Round;
             path.Join = LineJoin.Round;
         }
 
         private static PointF TransformPt(PointF p, RectangleF bounds, SizeF scale) 
-            => new PointF((float)(scale.Width * (p.X - bounds.X)),
+            => new((float)(scale.Width * (p.X - bounds.X)),
                 (float)(scale.Height * (bounds.Height - p.Y + bounds.Y)));
     }
 }

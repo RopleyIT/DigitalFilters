@@ -35,19 +35,18 @@ public static class Plot
         g.CompositingQuality = CompositingQuality.HighQuality;
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.SmoothingMode = SmoothingMode.HighQuality;
-        PlotAxes(bounds, scale, bmp);
+        PlotAxes(g, bounds, scale, bmp);
         int index = 0;
         foreach (List<PointF> pl in plots)
             PlotGraph(pl, g, bounds.Bounds, scale, colours[index++ % colours.Length]);
         return bmp;
     }
 
-    private static void PlotAxes(BoundsF bounds, SizeF scale, Bitmap bmp)
+    private static void PlotAxes(Graphics g, BoundsF bounds, SizeF scale, Bitmap bmp)
     {
         double unitsX = UnitSize(bounds.Bounds.Width);
         double unitsY = UnitSize(bounds.Bounds.Height);
 
-        using Graphics g = Graphics.FromImage(bmp);
         for (double v = RoundUp(bounds.Bounds.X, unitsX); v < bounds.Bounds.Right; v += unitsX)
         {
             List<PointF> rule = new()
@@ -75,15 +74,14 @@ public static class Plot
         // First generate label string
 
         string label = v.ToString("G2");
-        Font font = new("Consolas", 30F);
+        Font font = new("Consolas", 20F);
         SizeF txtSize = g.MeasureString(label, font);
 
         // Find the line position
-
-        float x = (float)(0.5 + scale.Width * (v - bounds.Bounds.X));
-        x -= txtSize.Width / 2;
-        g.FillRectangle(Brushes.White, x, 0, txtSize.Width, txtSize.Height);
-        g.DrawString(label, font, Brushes.Gray, x, 0);
+        PointF txtLoc = TransformPt(new PointF((float)v, 0), bounds.Bounds, scale);
+        txtLoc.Y -= txtSize.Height;
+        //g.FillRectangle(Brushes.White, txtLoc.X, txtLoc.Y, txtSize.Width, txtSize.Height);
+        g.DrawString(label, font, Brushes.Gray, txtLoc.X, txtLoc.Y);
     }
 
     private static void LabelYRule(double v, Graphics g, BoundsF bounds, SizeF scale)
@@ -91,18 +89,15 @@ public static class Plot
         // First generate label string
 
         string label = v.ToString("G3");
-        Font font = new("Consolas", 30F);
+        Font font = new("Consolas", 20F);
         SizeF txtSize = g.MeasureString(label, font);
 
         // Find the line position
-
-        float y = (float)(0.5 + scale.Height * (v - bounds.Bounds.Y));
-        y -= txtSize.Height / 2;
-        if (y > txtSize.Height * 1.5)
-        {
-            g.FillRectangle(Brushes.White, 0, y, txtSize.Width, txtSize.Height);
-            g.DrawString(label, font, Brushes.Gray, 0, y);
-        }
+        
+        PointF txtLoc = TransformPt(new PointF(0, (float)v), bounds.Bounds, scale);
+        txtLoc.Y -= txtSize.Height;
+        //g.FillRectangle(Brushes.White, txtLoc.X, txtLoc.Y, txtSize.Width, txtSize.Height);
+        g.DrawString(label, font, Brushes.Gray, txtLoc.X, txtLoc.Y);
     }
 
     private static double RoundUp(double x, double unitsX) => Math.Ceiling(x / unitsX) * unitsX;
@@ -127,12 +122,18 @@ public static class Plot
 
     private static void PlotGraph(List<PointF> points, Graphics g,
         RectangleF bounds, SizeF scale, Color penColor)
-    {
-        using Pen p = new(penColor, 3);
-        for (int i = 0; i < points.Count - 1; i++)
-            g.DrawLine(p, (int)(0.5 + scale.Width * (points[i].X - bounds.X)),
-                (int)(0.5 + scale.Height * (points[i].Y - bounds.Y)),
-                (int)(0.5 + scale.Width * (points[i + 1].X - bounds.X)),
-                (int)(0.5 + scale.Height * (points[i + 1].Y - bounds.Y)));
+    { 
+        using Pen p = new(penColor, 2);
+        p.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+        p.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+        p.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+        var transformedPoints = points
+            .Select(pt => TransformPt(pt, bounds, scale))
+            .ToArray();
+        g.DrawLines(p, transformedPoints);
     }
+
+    private static PointF TransformPt(PointF p, RectangleF bounds, SizeF scale)
+    => new((float)(scale.Width * (p.X - bounds.X)),
+        (float)(scale.Height * (bounds.Height - p.Y + bounds.Y)));
 }

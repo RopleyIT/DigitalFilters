@@ -3,7 +3,7 @@ using SvgPlotter;
 using System.Drawing;
 using System.Numerics;
 
-List<double> ApplyFilter(IIRFilter filter, List<double> source)
+static List<double> ApplyFilter(IIRFilter filter, List<double> source)
 {
     List<double> result = new(source.Count);
     result = filter.Filter(source).ToList();
