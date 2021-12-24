@@ -8,11 +8,13 @@ namespace SvgPlotter;
 
 public static class Plot
 {
-    private static double ScaleFactor(RectangleF bounds, int width, int height)
+    private static SizeF ScaleFactor(RectangleF bounds, int width, int height, bool lockAspectRatio)
     {
-        double scaleY = height / bounds.Height;
-        double scaleX = width / bounds.Width;
-        return Math.Min(scaleX, scaleY);
+        float scaleY = height / bounds.Height;
+        float scaleX = width / bounds.Width;
+        if (lockAspectRatio)
+            scaleY = scaleX = Math.Min(scaleX, scaleY);
+        return new SizeF(scaleX, scaleY);
     }
 
     public static Image PlotGraphs(IEnumerable<IEnumerable<PointF>> points, int width, int height, Color? color = null)
@@ -27,7 +29,7 @@ public static class Plot
         List<List<PointF>> plots = new();
         foreach (IEnumerable<PointF> pl in points)
             plots.Add(bounds.Track(pl).ToList());
-        double scale = ScaleFactor(bounds.Bounds, width, height);
+        SizeF scale = ScaleFactor(bounds.Bounds, width, height, false);
         using Graphics g = Graphics.FromImage(bmp);
         g.FillRectangle(Brushes.White, 0, 0, width, height);
         g.CompositingQuality = CompositingQuality.HighQuality;
@@ -40,7 +42,7 @@ public static class Plot
         return bmp;
     }
 
-    private static void PlotAxes(BoundsF bounds, double scale, Bitmap bmp)
+    private static void PlotAxes(BoundsF bounds, SizeF scale, Bitmap bmp)
     {
         double unitsX = UnitSize(bounds.Bounds.Width);
         double unitsY = UnitSize(bounds.Bounds.Height);
@@ -68,7 +70,7 @@ public static class Plot
         }
     }
 
-    private static void LabelXRule(double v, Graphics g, BoundsF bounds, double scale)
+    private static void LabelXRule(double v, Graphics g, BoundsF bounds, SizeF scale)
     {
         // First generate label string
 
@@ -78,13 +80,13 @@ public static class Plot
 
         // Find the line position
 
-        float x = (float)(0.5 + scale * (v - bounds.Bounds.X));
+        float x = (float)(0.5 + scale.Width * (v - bounds.Bounds.X));
         x -= txtSize.Width / 2;
         g.FillRectangle(Brushes.White, x, 0, txtSize.Width, txtSize.Height);
         g.DrawString(label, font, Brushes.Gray, x, 0);
     }
 
-    private static void LabelYRule(double v, Graphics g, BoundsF bounds, double scale)
+    private static void LabelYRule(double v, Graphics g, BoundsF bounds, SizeF scale)
     {
         // First generate label string
 
@@ -94,7 +96,7 @@ public static class Plot
 
         // Find the line position
 
-        float y = (float)(0.5 + scale * (v - bounds.Bounds.Y));
+        float y = (float)(0.5 + scale.Height * (v - bounds.Bounds.Y));
         y -= txtSize.Height / 2;
         if (y > txtSize.Height * 1.5)
         {
@@ -124,13 +126,13 @@ public static class Plot
     }
 
     private static void PlotGraph(List<PointF> points, Graphics g,
-        RectangleF bounds, double scale, Color penColor)
+        RectangleF bounds, SizeF scale, Color penColor)
     {
         using Pen p = new(penColor, 3);
         for (int i = 0; i < points.Count - 1; i++)
-            g.DrawLine(p, (int)(0.5 + scale * (points[i].X - bounds.X)),
-                (int)(0.5 + scale * (points[i].Y - bounds.Y)),
-                (int)(0.5 + scale * (points[i + 1].X - bounds.X)),
-                (int)(0.5 + scale * (points[i + 1].Y - bounds.Y)));
+            g.DrawLine(p, (int)(0.5 + scale.Width * (points[i].X - bounds.X)),
+                (int)(0.5 + scale.Height * (points[i].Y - bounds.Y)),
+                (int)(0.5 + scale.Width * (points[i + 1].X - bounds.X)),
+                (int)(0.5 + scale.Height * (points[i + 1].Y - bounds.Y)));
     }
 }
