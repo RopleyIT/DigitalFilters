@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
+﻿using System.Numerics;
 namespace DigitalFilters
 {
     public class ComplexPoly
@@ -17,7 +12,7 @@ namespace DigitalFilters
         private void ZeroCoefficients(int order)
         {
             Coefficients.Clear();
-            for(int i = 0; i <= order; i++)
+            for (int i = 0; i <= order; i++)
                 Coefficients.Add(Complex.Zero);
         }
 
@@ -35,8 +30,8 @@ namespace DigitalFilters
 
             // Now apply the shift and multiply algorithm
 
-            for(int i = 0; i <= Order; i++)
-                for(int j = 0; j <= z.Order; j++)
+            for (int i = 0; i <= Order; i++)
+                for (int j = 0; j <= z.Order; j++)
                     result.Coefficients[i + j] += Coefficients[i] * z.Coefficients[j];
 
             return result;
@@ -54,7 +49,7 @@ namespace DigitalFilters
         public ComplexPoly Clone()
         {
             ComplexPoly result = new();
-            for (int i = 0;i <= Order;i++)
+            for (int i = 0; i <= Order; i++)
                 result.Coefficients.Add(Coefficients[i]);
             return result;
         }
@@ -90,7 +85,7 @@ namespace DigitalFilters
         /// want to calculate the value for</param>
         /// <returns>The value of the polynomial at the specified
         /// point</returns>
-        
+
         public Complex Value(Complex z)
         {
             var zPower = Complex.One;

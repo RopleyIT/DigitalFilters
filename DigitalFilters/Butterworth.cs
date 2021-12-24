@@ -14,13 +14,13 @@ namespace DigitalFilters
         /// if the ** operator existed as the
         /// power operator in C#!
         /// </summary>
-        
+
         public bool HighPass { get; init; }
 
         /// <summary>
         /// Order of the filter, minimum value 1
         /// </summary>
-        
+
         public int Order { get; init; }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace DigitalFilters
         /// radians per second. Divide by 2π
         /// to obtain frequency in Hertz.
         /// </summary>
-        
+
         public double CutOff { get; init; }
 
         /// <summary>
@@ -80,19 +80,19 @@ namespace DigitalFilters
         /// <param name="index"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        
+
         public Complex Pole(int index)
         {
             if (index < 0 || index > Order)
                 throw new ArgumentException("Pole indices 1 ... Order");
-            double angle = Math.PI*(2*index + Order - 1)/(2*Order);
+            double angle = Math.PI * (2 * index + Order - 1) / (2 * Order);
             return new Complex(Math.Cos(angle), Math.Sin(angle));
         }
 
         private IReadOnlyList<ComplexPoly> InitPolynomials()
         {
             var polynomials = new List<ComplexPoly>();
-            for (int i = 1; i <= Order/2; i++)
+            for (int i = 1; i <= Order / 2; i++)
             {
                 var pole = Pole(i);
                 ComplexPoly poly = new();
@@ -101,7 +101,7 @@ namespace DigitalFilters
                 poly.Coefficients.Add(1);
                 polynomials.Add(poly);
             }
-            if((Order & 1) != 0)
+            if ((Order & 1) != 0)
             {
                 ComplexPoly poly = new();
                 poly.Coefficients.Add(1);

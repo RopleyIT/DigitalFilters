@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
+using System.Linq;
 
 namespace SvgPlotter
 {
     /// <summary>
     /// Plot a set of points on a graph using SVG graphics
     /// </summary>
-    
+
     public static class SvgGraph
     {
         private static double ScaleFactor(RectangleF bounds, int width, int height)
@@ -29,15 +27,15 @@ namespace SvgPlotter
 
             SVGCreator svgImage = new();
             svgImage.DocumentDimensions = new Size(width, height);
-            svgImage.ViewBoxDimensions = new RectangleF(0, 0, 
-                svgImage.DocumentDimensions.Width, 
+            svgImage.ViewBoxDimensions = new RectangleF(0, 0,
+                svgImage.DocumentDimensions.Width,
                 svgImage.DocumentDimensions.Height);
             BoundsF bounds = new();
             List<List<PointF>> plots = new();
             foreach (IEnumerable<PointF> pl in points)
                 plots.Add(bounds.Track(pl).ToList());
             double scale = ScaleFactor(bounds.Bounds, width, height);
-            
+
             PlotAxes(bounds, scale, svgImage);
             int index = 0;
             foreach (List<PointF> pl in plots)
@@ -94,7 +92,7 @@ namespace SvgPlotter
             string label = v.ToString("G3");
             float y = (float)(0.5 + scale * (v - bounds.Bounds.Y));
             y -= txtHeight / 2;
-            svgImage.AddText(label, new PointF(0, y), 
+            svgImage.AddText(label, new PointF(0, y),
                 $"{txtHeight}px", "sans-serif", false, false, "gray");
         }
 
@@ -123,8 +121,8 @@ namespace SvgPlotter
         {
             var transformedPoints =
                 from p in points
-                select new PointF((float)(scale*(p.X - bounds.X)), 
-                                (float)(scale*(p.Y - bounds.Y)));
+                select new PointF((float)(scale * (p.X - bounds.X)),
+                                (float)(scale * (p.Y - bounds.Y)));
             var path = svgImage.AddPolyline(transformedPoints, penColor, 3);
             path.Cap = LineCap.Round;
             path.Join = LineJoin.Round;

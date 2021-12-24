@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace DigitalFilters
 {
@@ -13,10 +8,10 @@ namespace DigitalFilters
     /// for either forward or inverse transforms, but once
     /// created the size of the sample sets is fixed.
     /// </summary>
-    
+
     public class FastFourierTransform
     {
-        public Complex[] TwiddleFactors { get; init; }
+        public TwiddleFactors Twiddles { get; init; }
         private readonly int numBits;
 
         /// <summary>
@@ -32,51 +27,38 @@ namespace DigitalFilters
         /// <exception cref="ArgumentException">Thrown
         /// if the argument is not an integer in the
         /// range 2 to 16</exception>
-        
-        public FastFourierTransform(int log2Points)
+
+        public FastFourierTransform(int numSamples)
         {
-            if (log2Points < 2 || log2Points > 16)
+            if (!TwiddleFactors.IsPositivePowerOfTwo(numSamples)
+                || numSamples < 4 || numSamples > 65536)
                 throw new ArgumentException
-                    ("Log to base 2 of number of points must be between 2 and 16 inclusive");
-            numBits = log2Points;
+                    ("Number of points in transform a power of 2, from 4 to 65536");
 
-            // Calculate the twiddle factors used by the transform
+            // Calculate the twiddle factors used by the transform.
+            // For a 32 point transform, we find 64 points, so that
+            // when doing a forward 64 real sample to 32 complex
+            // frequency sample transform, we have the 64 twiddle
+            // factors that we need.
 
-            TwiddleFactors = CalculateTwiddleFactors();
+            Twiddles = new(numSamples << 1);
+
+            // Calculate the number of bits in the indices
+
+            for (numBits = 0; numSamples > 1; numBits++)
+                numSamples >>= 1;
         }
 
         private int BitReverse(int i)
-        { 
+        {
             int result = 0;
-            for(int targetBit = 1 << (numBits-1); targetBit > 0; targetBit >>= 1)
+            for (int targetBit = 1 << (numBits - 1); targetBit > 0; targetBit >>= 1)
             {
                 if ((i & 1) != 0)
                     result |= targetBit;
                 i >>= 1;
             }
             return result;
-        }
-
-        private Complex[] CalculateTwiddleFactors()
-        {
-            int quarterPointCount = 1 << (numBits - 2);
-            var twiddles = new Complex[quarterPointCount << 2];
-            double AngleDelta = Math.PI /(quarterPointCount << 1);
-            double[] cosValues = new double[1 + quarterPointCount];
-            for (int i = quarterPointCount; i >= 0; i--)
-                cosValues[i] = Math.Cos(i * AngleDelta);
-            int quadrant2 = quarterPointCount << 1;
-            int quadrant3 = quarterPointCount + quadrant2;
-            for (int i = 0; i < quarterPointCount; i++)
-            {
-                var c = cosValues[i];
-                var s = cosValues[quarterPointCount - i];
-                twiddles[i] = new Complex(c, -s);
-                twiddles[i + quarterPointCount] = new Complex(-s, -c);
-                twiddles[i + quadrant2] = new Complex(-c, s);
-                twiddles[i + quadrant3] = new Complex(s, c);
-            }
-            return twiddles;
         }
 
         /// <summary>
@@ -96,7 +78,35 @@ namespace DigitalFilters
 
         public Complex[] ForwardTransform(double[] input)
         {
-            return Transform(input.Select(r => new Complex(r, 0)).ToArray(), false);
+            // Map the real input samples onto a half-length set of
+            // complex samples, with even samples in the real part
+            // and odd samples in the imaginary part.
+
+            Complex[] samples = new Complex[input.Length >> 1];
+            for (int i = 0; i < samples.Length; i++)
+                samples[i] = new Complex(input[i << 1], input[1 + (i << 1)]);
+            samples = Transform(samples, false);
+
+            // Length of output array includes the middle sample at the
+            // Nyquist rate. This is necessary in case we need to perform
+            // an inverse transform later.
+
+            Complex[] results = new Complex[samples.Length + 1];
+            for (int i = 0; i < samples.Length; i++)
+            {
+                var j = i == 0 ? 0 : (samples.Length - i);
+                double xpr = (samples[i].Real + samples[j].Real) / 2;
+                double xmr = (samples[i].Real - samples[j].Real) / 2;
+                double xpi = (samples[i].Imaginary + samples[j].Imaginary) / 2;
+                double xmi = (samples[i].Imaginary - samples[j].Imaginary) / 2;
+                Complex twiddle = Twiddles.Twiddle(i, samples.Length << 1);
+                double real = xpr + twiddle.Real * xpi + twiddle.Imaginary * xmr;
+                double imag = xmi + twiddle.Imaginary * xpi - twiddle.Real * xmr;
+                if (i == 0)
+                    results[samples.Length] = new Complex(xpr - xpi, xmi + xmr);
+                results[i] = new Complex(real, imag);
+            }
+            return results;
         }
 
         /// <summary>
@@ -120,27 +130,24 @@ namespace DigitalFilters
         /// the number of samples in the frequency domain
         /// does not match the expectations described above.
         /// </exception>
-        
+
         public double[] InverseTransform(Complex[] input)
         {
             Complex[] freqSamples;
-            if (input.Length == TwiddleFactors.Length)
-                freqSamples = input;
-            else if (input.Length == 1 + TwiddleFactors.Length / 2)
-            {
-                freqSamples = new Complex[TwiddleFactors.Length];
-                Array.Copy(input, freqSamples, input.Length);
-                for (int i = 1; i < TwiddleFactors.Length / 2; i++)
-                    freqSamples[^i] = Complex.Conjugate(freqSamples[i]);
-            }
-            else
-                throw new ArgumentException("Inverse transform sample count incorrect");
+            if (!TwiddleFactors.IsPositivePowerOfTwo(input.Length - 1))
+                throw new ArgumentException("Frequency samples must be 2^N + 1 in length");
+            if (input.Length >= Twiddles.Resolution)
+                throw new ArgumentException("Twiddle factors too coarse for this number of samples");
+            freqSamples = new Complex[(input.Length - 1) << 1];
+            Array.Copy(input, freqSamples, input.Length);
+            for (int i = 1; i < input.Length - 1; i++)
+                freqSamples[^i] = Complex.Conjugate(freqSamples[i]);
             return Transform(freqSamples, true).Select(s => s.Real).ToArray();
         }
 
         /// <summary>
         /// Perform the forward or inverse fast Fourier transform
-        /// on a sequence of points
+        /// on a sequence of complex points
         /// </summary>
         /// <param name="input">The input sequence of samples (or
         /// frequency samples if performing the inverse
@@ -156,17 +163,20 @@ namespace DigitalFilters
 
         public Complex[] Transform(Complex[] input, bool inverse)
         {
-            if (input.Length != TwiddleFactors.Length)
-                throw new ArgumentException("Wrong number of input samples fed to FFT");
+            if (!TwiddleFactors.IsPositivePowerOfTwo(input.Length))
+                throw new ArgumentException("Frequency samples must be 2^N in length");
+            if (input.Length > Twiddles.Resolution)
+                throw new ArgumentException
+                    ("Twiddle factors too coarse for this number of samples");
 
-            // Create a set of bit shuffled input samples from the input time domain data
+            // Create a set of bit shuffled input samples from the input data
 
             Complex[] samples = new Complex[input.Length];
 
             // First two butterflies need no complex multiplication
 
             Complex j = inverse ? -Complex.ImaginaryOne : Complex.ImaginaryOne;
-            for(int i = 0; i < samples.Length; i += 4)
+            for (int i = 0; i < samples.Length; i += 4)
             {
                 var pAddq = input[BitReverse(i)];
                 var lower = input[BitReverse(i + 1)];
@@ -184,33 +194,29 @@ namespace DigitalFilters
 
             // Remaining butterflies need to be computed
 
-            for(int groupSize = 8; groupSize <= samples.Length; groupSize <<= 1)
+            for (int groupSize = 8; groupSize <= samples.Length; groupSize <<= 1)
             {
                 int numGroups = samples.Length / groupSize;
-                for(int group = 0; group < numGroups; group++)
+                for (int group = 0; group < numGroups; group++)
                 {
-                    for(int i = 0; i < (groupSize>>1); i++)
+                    for (int i = 0; i < (groupSize >> 1); i++)
                     {
                         int upper = group * groupSize + i;
                         int lower = upper + (groupSize >> 1);
-                        Butterfly(ref samples[upper], ref samples[lower], 
-                            GetTwiddle(i * numGroups, inverse));
+
+                        // The 2*i below is because we have twice as many
+                        // twiddle factors as we need, in case we are
+                        // implementing a transform of 2N real samples
+
+                        int k = inverse ? -i : i;
+                        Butterfly(ref samples[upper], ref samples[lower],
+                            Twiddles.Twiddle(k * numGroups, samples.Length));
                     }
                 }
             }
             if (inverse)
                 samples = samples.Select(s => s / samples.Length).ToArray();
             return samples;
-        }
-
-        private Complex GetTwiddle(int i, bool inverse)
-        {
-            if (i == 0)
-                return 1;
-            if (inverse)
-                return TwiddleFactors[^i];
-            else
-                return TwiddleFactors[i];
         }
 
         private static void Butterfly(ref Complex upper, ref Complex lower, Complex w)

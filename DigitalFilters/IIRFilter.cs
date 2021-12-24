@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
-
-namespace DigitalFilters
+﻿namespace DigitalFilters
 {
     /// <summary>
     /// Infinite Impulse Response digital filter constructed
@@ -24,21 +17,21 @@ namespace DigitalFilters
         /// <summary>
         /// The sampling rate for the digital filter, in Hz
         /// </summary>
-        
+
         public double SamplingRate { get; init; }
-        
+
         /// <summary>
         /// The sets of coeficients for each stage of the
         /// digital filter
         /// </summary>
-        
+
         public List<IIRFilterStage> FilterStages { get; init; }
-        
+
         /// <summary>
         /// The analog filter whence this digital filter was
         /// fashioned
         /// </summary>
-        
+
         public IFilter AnalogueFilter { get; init; }
 
         /// <summary>
@@ -49,7 +42,7 @@ namespace DigitalFilters
         /// filter</param>
         /// <param name="samplingRate">The digital sampling rate
         /// for the digital filter</param>
-        
+
         public IIRFilter(IFilter analogueFilter, double samplingRate, double gain = 1)
         {
             SamplingRate = samplingRate;
@@ -132,21 +125,21 @@ namespace DigitalFilters
         /// </summary>
         /// <param name="source">The input samples to be filtered</param>
         /// <returns>An enumerable for the output filtered samples</returns>
-        
+
         private static IEnumerable<double> AddFilterStage
             (IIRFilterStage stage, IEnumerable<double> source)
         {
             double xPrev = 0, x2Prev = 0, yPrev = 0, y2Prev = 0;
 
-            foreach(double d in source)
+            foreach (double d in source)
             {
                 // Calculate the next output sample
 
-                double output = d * stage.CoeffX[0] 
+                double output = d * stage.CoeffX[0]
                     + xPrev * stage.CoeffX[1] + yPrev * stage.CoeffY[0];
                 if (stage.CoeffY.Length > 1)
                 {
-                    output += x2Prev * stage.CoeffX[2] 
+                    output += x2Prev * stage.CoeffX[2]
                         + y2Prev * stage.CoeffY[1];
 
                     // Now shift all the historic taps
@@ -165,7 +158,7 @@ namespace DigitalFilters
         /// </summary>
         /// <param name="source">The unfiltered input stream of samples</param>
         /// <returns>The enumerable output stream from the filter</returns>
-        
+
         public IEnumerable<double> Filter(IEnumerable<double> source)
         {
             IEnumerable<double> sink = source;

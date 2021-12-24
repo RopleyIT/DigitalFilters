@@ -1,7 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DigitalFilters;
-using System.Numerics;
-using System;
+﻿using DigitalFilters;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DigitalFilterTests
 {

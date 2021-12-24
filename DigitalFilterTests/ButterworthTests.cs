@@ -1,7 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DigitalFilters;
-using System.Numerics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Numerics;
 
 namespace DigitalFilterTests
 {
@@ -82,7 +82,7 @@ namespace DigitalFilterTests
         [TestMethod]
         public void DCGainCorrectAtFreq()
         {
-            Butterworth bw = new(9, 1000*Math.PI, false); // 500Hz cutoff
+            Butterworth bw = new(9, 1000 * Math.PI, false); // 500Hz cutoff
             Complex v = bw.OutputAtFrequency(0);
             Assert.AreEqual(1.0, v.Real, 0.001);
             Assert.AreEqual(0.0, v.Imaginary, 0.001);
@@ -99,8 +99,8 @@ namespace DigitalFilterTests
         [TestMethod]
         public void GainAtCutoffCorrect()
         {
-            Butterworth bw = new(7, 1000*Math.PI, false);
-            Complex v = bw.OutputAtFrequency(1000*Math.PI);
+            Butterworth bw = new(7, 1000 * Math.PI, false);
+            Complex v = bw.OutputAtFrequency(1000 * Math.PI);
             Assert.AreEqual(1.414, v.Magnitude, 0.001);
         }
     }
