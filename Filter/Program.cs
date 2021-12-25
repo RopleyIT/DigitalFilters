@@ -36,7 +36,7 @@ sw.Write(svgPlot);
 sw.Close();
 */
 
-List<double> input = SignalSources.WhiteNoise(65536, 0.6).ToList();
+List<double> input = SignalSources.SyntheticNoise(65536).ToList();
 Butterworth bw = new(7, 2 * Math.PI * 400, false);
 Butterworth hw = new(7, 2 * Math.PI * 100, true);
 IIRFilter iir = new(bw, 2000);
