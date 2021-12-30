@@ -1,13 +1,13 @@
-# Butterworth Filters
+# Analogue and Digital Filters
 
-Butterworth filters are used in electronic analogue circuits to filter out unwanted frequencies from signals, such as audio streams. By taking an analogue Butterworth filter design and applying some standard transformations to it, it can be used to implement the equivalent digital filter, filtering a stream of samples in a computer, for example.
+Analogue filters are used in analogue electronic circuits to filter out unwanted frequencies from signals, such as audio streams. In this form, they are usually implemented with capacitors, inductors and resistors, often with operational amplifiers at lower frequencies to preserve gain. By taking an analogue filter design and applying some standard transformations to it, it can be used to implement the equivalent digital filter, filtering a continuous,equally-spaced stream of samples in a computer, for example.
 
-The noteworthy characteristic of the Butterworth filter is that it is 'maximally flat in the passband'. This means that over the range of frequencies it is not attenuating, the ratio of
-input to output signal amplitude stays pretty constant. The rate at which it increases the
+A number of well known analogue filter families exist, with names such as Butterworth, Bessel, Tchebyshev or Elliptical. The noteworthy characteristic of the best known of these, th Butterworth filter, is that it is 'maximally flat in the passband'. This means that over the range of frequencies it is not attenuating, the ratio of
+input to output signal amplitude stays pretty constant. For each of these analogue filters, the rate at which they increase the
 attenuation of the signal as the frequency deviates away from the passband is determined by
 the 'order' of the filter. 
 
-There is brilliant literature on the maths used to design Butterworth filters available on the Web. We are not going to reregurgitate that here, but some good links to introductory and topical material are given.
+There is brilliant literature on the maths used to design analogue filters, such as the Butterworth filters, available on the Web. We are not going to reregurgitate that here, but some good links to introductory and topical material are given.
 
 - Introduction to Laplacian mathematics as used in filter design:
 
@@ -28,9 +28,9 @@ and *Infinite Impulse Response (IIR)* filters. Digital filters created from an a
 design, such as the Butterworth filter family, are nearly always IIR filters.
 
 IIR filters are usually more complex to design than FIR, but they have a major advantage when
-it comes to complexity. Very few multiplications and additions on sample streams need to be
-performed to create each output sample from these filters. The equivalent FIR filters though
-simple to design usually perform more computations per sample.
+it comes to operational complexity. Very few multiplications and additions on sample streams need to be
+performed to create each output sample from these filters. The equivalent FIR filters, though
+simple to design, usually perform more computations per sample.
 
 ### Design steps for IIR filters
 
@@ -39,7 +39,8 @@ The details of how digital filters are derived from their analogue counterparts 
 1. The analogue equivalent filter is designed, for example the Butterworth filters discussed in the links above;
 2. The chosen cut-off frequency for the analogue filter (where the edge of the passband appears in the frequency spectrum) needs to be *pre-warped*. This is because the next step that translates the filter design to the digital domain distorts the frequency spectrum somewhat, so by pre-warping we arrange that the cut-off frequency is in the right place once that distortion happens;
 3. The Bilinear-Z Transform is applied to the pre-warped analogue filter design;
-4. The difference equation is derived from the resulting Z-domain transfer function.
+4. The difference equation is derived from the resulting Z-domain transfer function, this being a direct representation of the multiplications, additions, and sample memory stores used in the
+implementation.
 
 The libraries in this software suite carry out all this work for you. You can tell them what order of Butterworth filter you want, and what cut-off frequency it should have. You can tell them what the sampling rate will be for the equivalent digital filter, and the library will do the pre-warping and give you back a working filter that implements the linear difference equation for the filter at the chosen sample rate.
 
@@ -88,3 +89,51 @@ are described here.
 | `IEnumerable<double> Filter(IEnumerable<double> source)` | Use the instance of the filter held by this IIRFilter object. |
 | `source` | The input stream of samples |
 | Return value | Returns the filtered stream of samples. Can use multiple filters in cascade this way. |
+
+### A worked example
+
+Let's say we wish to design a filter to be used in a system that is processing input samples at
+a rate of 2000 samples per second. The filter is to be a bandpass filter allowing waveform
+frequencies through between 100 and 400 Hz. Outside this range, we require the signal to be
+well attenuated.
+
+For argument's sake, we are going to assume that our filter needs seventh order filter designs
+in order to get a fast enough drop off in the transition band (the range of frequencies just to
+either side of the passband in which the signal becomes rapidly more attenuated the more Hz you
+get away from the cut-off frequencies).
+
+To create the analogue filter, we would use the Butterworth filter class as follows:
+
+```
+Butterworth bw = new(7, 2 * Math.PI * 400, false);
+Butterworth hw = new(7, 2 * Math.PI * 100, true);
+```
+
+This code creates a low pass filter with a cutoff frequency of 400Hz, that is 7th order. Note the frequency argument should be an angular frequency in radians per second rather than a straight frequency in Hz. Hence the multiplication by 2*PI.
+
+The second line of code creates a high pass filter that attenuates frequencies lower than 100Hz.
+It too has been chosen to be seventh order.
+
+By using one of these filters to filter the output of the other, we create the bandpass filter we originally set as our goal.
+
+These filters have each created a numer of what are called first or second order filter stages. With seventh order filters, this means three second order filter stages and one first order stage. Each of these filter stages is described by a complex polynomial of the Laplacian complex frequency variable 's'. They are found in the `Polynomials` property of the Butterworth object as a read only list of polynomials.
+
+We are now going to use these arrays of polynomials to create the digital filters using the Bilinear Z transform with frequency pre-warping. For each of the filters described above, we do this by creating two IIRFilter objects as follows:
+
+```
+IIRFilter iir = new(bw, 2000);
+IIRFilter hir = new(hw, 2000);
+```
+
+These lines of code have created two digital filters, one for each Butterworth filter, for use at a sampling
+rate of 2 kHz. Note that the sampling frequency here is specified in Hz, not radians per second
+as with the Butterworth filter objects, just to confuse you! Internally they capture the Laplacian polynomials, and using the sampling rate argument apply the frequency warping. They then figure out exactly what architecture to use to implement each digital filter.
+
+The IIRFilter class can also be used as the filter instance itself. It takes an `IEnumerable<double>` as an input sample stream from which it pulls the samples at the 2kHz sampling rate, and it returns another IEnumerable<double> which provides the output sample stream. Note that there is no buffering or strict 2kHz timing enforced by this implementation. If you pull one sample from the output, it will cause one sample to be pulled from the source stream, meaning the flow rate is determined by the caller. 
+
+Some sample code below shows the use of the above two filters to implement a bandpass structure. Note that the two filters are cascaded to apply both the high pass and the low pass filtering.
+
+```
+IEnumerable<double> sourceSamples = ? ? ? // Fetch raw samples from somewhere
+IEnumerable<double> filteredSamples = hir.Filter(iir.Filter(sourceSamples));
+```

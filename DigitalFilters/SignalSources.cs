@@ -36,6 +36,7 @@ namespace DigitalFilters
         /// Create a stream of samples that follow the shape of a sine wave
         /// </summary>
         /// <param name="frequency">The frequency of the sine wave in Hz</param>
+        /// <param name="phase">The phase of the sinewave. Measured in degrees</param>
         /// <param name="sampleRate">The number of samples per second</param>
         /// <param name="duration">The total number of samples in the
         /// sequence</param>
@@ -44,10 +45,11 @@ namespace DigitalFilters
         /// <returns>The sequence of sinewave samples</returns>
         
         public static IEnumerable<double> SineWave
-            (int frequency, int sampleRate, int duration, double magnitude = 1.0)
+            (int frequency, int phase, int sampleRate, int duration, double magnitude = 1.0)
         {
             for (int i = 0; i < duration; i++)
-                yield return magnitude * Math.Sin(2 * i * Math.PI * frequency / sampleRate);
+                yield return magnitude * Math.Sin
+                    (2 * Math.PI * (phase / 360.0 +  i * frequency / sampleRate));
         }
 
         /// <summary>
@@ -71,19 +73,6 @@ namespace DigitalFilters
         }
 
         /// <summary>
-        /// Create a sequence of gaussianly distributed white noise
-        /// </summary>
-        /// <param name="sampleCount">The number of samples in the sequence</param>
-        /// <param name="gain">A factor to adjust the amplitude of the noise</param>
-        /// <returns>The Gaussian noise sequence</returns>
-        
-        public static IEnumerable<double> WhiteNoise(int sampleCount, double gain = 1.0)
-        {
-            for (int i = 0; i < sampleCount; i++)
-                yield return Gaussian() * gain;
-        }
-
-        /// <summary>
         /// Create a spectrally flat noise signal by using a constant
         /// magnitude but random phase for all frequency samples in a
         /// spectrum, then take the inverse FFT to convert it into a
@@ -91,27 +80,27 @@ namespace DigitalFilters
         /// filter's output, by feeding this sequence into a filter,
         /// then taking the forward FFT of the filter's output sequence.
         /// </summary>
-        /// <param name="sampleCount">The number of samples in the
+        /// <param name="duration">The number of samples in the
         /// noise sequence. This must be a power of two, as it will
         /// emerge from an Inverse FFT</param>
-        /// <param name="gain">The magnitude for each frequency in
+        /// <param name="magnitude">The magnitude for each frequency in
         /// the spectrum</param>
         /// <returns>The spectrally flat noise signal</returns>
         /// <exception cref="ArgumentException">Thrown if the
         /// numer of samples requested is not a power of two
         /// </exception>
         
-        public static IEnumerable<double> SyntheticNoise(int sampleCount, double gain = 1.0)
+        public static IEnumerable<double> SyntheticNoise(int duration, double magnitude = 1.0)
         {
-            if (!TwiddleFactors.IsPositivePowerOfTwo(sampleCount))
+            if (!TwiddleFactors.IsPositivePowerOfTwo(duration))
                 throw new ArgumentException("Length of sequence must be power of two");
             Random r = new Random((int)(DateTime.Now.Ticks));
-            Complex[] freqSamples = new Complex[sampleCount/2 + 1];
-            FastFourierTransform fft = new FastFourierTransform(sampleCount);
+            Complex[] freqSamples = new Complex[duration/2 + 1];
+            FastFourierTransform fft = new FastFourierTransform(duration);
             for (int i = 0; i < freqSamples.Length; i++)
             {
                 double angle = r.NextDouble() * 2 * Math.PI;
-                freqSamples[i] = new Complex(gain * Math.Cos(angle), gain * Math.Sin(angle));
+                freqSamples[i] = new Complex(magnitude * Math.Cos(angle), magnitude * Math.Sin(angle));
             }
             double[] results = fft.InverseTransform(freqSamples);
             foreach(double result in results)
@@ -121,12 +110,12 @@ namespace DigitalFilters
         static readonly Random random = new((int)(DateTime.Now.Ticks));
 
         /// <summary>
-        /// Simplistic Gaussian Noise generator
+        /// Simplistic Gaussian Noise sample generator
         /// </summary>
-        /// <returns>A sample that has a Gausssian probability for
+        /// <returns>A sample that has a Gaussian probability for
         /// its amplitude</returns>
         
-        public static double Gaussian()
+        private static double Gaussian()
         {
             double v = 0;
             for (int i = 0; i < 8192; i++)
@@ -134,5 +123,59 @@ namespace DigitalFilters
             return v;
         }
 
+        /// <summary>
+        /// Create a sequence of gaussian white noise samples
+        /// </summary>
+        /// <param name="duration">The number of samples in the sequence</param>
+        /// <param name="magnitude">A factor to adjust the amplitude of the noise</param>
+        /// <returns>The Gaussian noise sequence</returns>
+        
+        public static IEnumerable<double> WhiteNoise(int duration, double magnitude = 1.0)
+        {
+            for (int i = 0; i < duration; i++)
+                yield return Gaussian() * magnitude;
+        }
+
+        /// <summary>
+        /// Given two input sequences, create an output sequence that is the sum
+        /// of its corresponding samples from the two source sequences.
+        /// </summary>
+        /// <param name="src1">The first input sequence</param>
+        /// <param name="src2">The second input sequence</param>
+        /// <returns>An output sequence that is the result of applying the combining
+        /// operation on each consecutive pair of input samples. Note that the length
+        /// of the output sequence matches the length of the shortest of the two
+        /// input sequences</returns>
+
+        public static IEnumerable<double> Sum(IEnumerable<double> src1, IEnumerable<double> src2)
+            => src1.Zip(src2, (s, t) => s + t);
+
+        /// <summary>
+        /// Given two input sequences, create an output sequence that is the difference
+        /// between corresponding samples from the two source sequences.
+        /// </summary>
+        /// <param name="src1">The first input sequence</param>
+        /// <param name="src2">The second input sequence</param>
+        /// <returns>An output sequence that is the result of applying the combining
+        /// operation on each consecutive pair of input samples. Note that the length
+        /// of the output sequence matches the length of the shortest of the two
+        /// input sequences</returns>
+        
+        public static IEnumerable<double> Difference(IEnumerable<double> src1, IEnumerable<double> src2)
+            => src1.Zip(src2, (s, t) => s - t);
+        
+        /// <summary>
+        /// Given two input sequences, create an output sequence that is the product
+        /// of rresponding samples from the two source sequences.
+        /// </summary>
+        /// <param name="src1">The first input sequence</param>
+        /// <param name="src2">The second input sequence</param>
+        /// <returns>An output sequence that is the result of applying the combining
+        /// operation on each consecutive pair of input samples. Note that the length
+        /// of the output sequence matches the length of the shortest of the two
+        /// input sequences</returns>
+        
+        public static IEnumerable<double> Product(IEnumerable<double> src1, IEnumerable<double> src2)
+            => src1.Zip(src2, (s, t) => s * t);
     }
 }
