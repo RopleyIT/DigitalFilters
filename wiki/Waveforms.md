@@ -87,7 +87,7 @@ The `Product` operator multiplies the corresponding samples in the two input seq
 
 ## Example
 
-The following code creates a waveform that is a sinewave at 400Hz added to a cosine wave at 600Hz, then the whole thing windowed in amplitude with what is called a Hanning window, this
+The following code creates a waveform that is a sinewave at 400Hz added to a cosine wave at 600Hz, then the whole thing windowed in amplitude with what is called a Hann window after its inventor, Julius von Hann, this
 being an effect where you multiply the whole waveform by a long slow raised cosine shape so that
 the middle of the waveform is full amplitude but the waveform tapers away to nothing at the
 start and end of the waveform sequence:
