@@ -13,11 +13,11 @@ are at the same frequency as their analogue counterparts
 - Creating waveforms or pulses of various shapes to feed through the filters or transforms
 
 The documentation on basic creation of analog filter designs and their transformation into
-digital (sampled) equivalent filters is given [here](/wiki/butterworth.md).
+digital (sampled) equivalent filters is given [here](https://github.com/RopleyIT/DigitalFilters/wiki/butterworth.md).
 
-The description on how to use the waveform generation libraries is given [here](/wiki/waveforms.md).
+The description on how to use the waveform generation libraries is given [here](https://github.com/RopleyIT/DigitalFilters/wiki/waveforms.md).
 
-The description on how to use the forward and inverse fast Fourier transform libraries is available [here]{/wiki/ff.md).
+The description on how to use the forward and inverse fast Fourier transform libraries is available [here]{https://github.com/RopleyIT/DigitalFilters/wiki/ff.md).
 }
 ## Footnote
 Please note that this is ongoing work which you are welcome to use, or to make suggestions for improvements. rather than a completed product in support. Once a comprehensive
