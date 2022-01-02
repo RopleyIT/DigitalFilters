@@ -91,8 +91,16 @@ namespace DigitalFilterTests
         {
             FastFourierTransform fft = new(1024);
             Complex[] samples = new Complex[1024];
+            var noiseSource = SignalSources.WhiteNoise(2048, 1.0);
+            var iterator = noiseSource.GetEnumerator();
             for (int i = 1; i < 1024; i++)
-                samples[i] = new(SignalSources.Gaussian(), SignalSources.Gaussian());
+            {
+                iterator.MoveNext();
+                var real = iterator.Current;
+                iterator.MoveNext();
+                var imaginary = iterator.Current;
+                samples[i] = new(real, imaginary);
+            }
             Complex[] outputSamples = fft.Transform(samples, false);
             Assert.AreEqual(1024, outputSamples.Length);
             Complex[] inverseSamples = fft.Transform(outputSamples, true);
@@ -107,9 +115,8 @@ namespace DigitalFilterTests
         public void SmallWhiteNoise()
         {
             FastFourierTransform fft = new(16);
-            double[] samples = new double[32];
-            for (int i = 1; i < 32; i++)
-                samples[i] = SignalSources.Gaussian();
+            var noiseSource = SignalSources.WhiteNoise(32, 1.0);
+            double[] samples = noiseSource.ToArray();
             Complex[] outputSamples = fft.ForwardTransform(samples);
             Assert.AreEqual(17, outputSamples.Length);
             fft = new(32);

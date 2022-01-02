@@ -94,9 +94,9 @@ namespace DigitalFilters
         {
             if (!TwiddleFactors.IsPositivePowerOfTwo(duration))
                 throw new ArgumentException("Length of sequence must be power of two");
-            Random r = new Random((int)(DateTime.Now.Ticks));
+            Random r = new ((int)(DateTime.Now.Ticks));
             Complex[] freqSamples = new Complex[duration/2 + 1];
-            FastFourierTransform fft = new FastFourierTransform(duration);
+            FastFourierTransform fft = new (duration);
             for (int i = 0; i < freqSamples.Length; i++)
             {
                 double angle = r.NextDouble() * 2 * Math.PI;

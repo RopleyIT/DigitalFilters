@@ -35,14 +35,14 @@ public static class Plot
         g.CompositingQuality = CompositingQuality.HighQuality;
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.SmoothingMode = SmoothingMode.HighQuality;
-        PlotAxes(g, bounds, scale, bmp);
+        PlotAxes(g, bounds, scale);
         int index = 0;
         foreach (List<PointF> pl in plots)
             PlotGraph(pl, g, bounds.Bounds, scale, colours[index++ % colours.Length]);
         return bmp;
     }
 
-    private static void PlotAxes(Graphics g, BoundsF bounds, SizeF scale, Bitmap bmp)
+    private static void PlotAxes(Graphics g, BoundsF bounds, SizeF scale)
     {
         double unitsX = UnitSize(bounds.Bounds.Width);
         double unitsY = UnitSize(bounds.Bounds.Height);
