@@ -25,7 +25,7 @@ Dolph Chebyshev window that has a much wider main lobe, but all sidelobes
 below -100dB.
 
 For a more detailed foray into the world of window functions the
-[Wikipedia entry](https://en.wikipedia.org/wiki/Window_function]
+[Wikipedia entry](https://en.wikipedia.org/wiki/Window_function)
 is a good starting point for more details and for
 onward-linking references. Remember to donate to Wikipedia of course!
 
