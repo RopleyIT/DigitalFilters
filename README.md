@@ -17,8 +17,8 @@ digital (sampled) equivalent filters is given [here](https://github.com/RopleyIT
 
 The description on how to use the waveform generation libraries is given [here](https://github.com/RopleyIT/DigitalFilters/blob/master/wiki/waveforms.md).
 
-The description on how to use the forward and inverse fast Fourier transform libraries is available [here]{https://github.com/RopleyIT/DigitalFilters/blob.master/wiki/ff.md).
-}
+The description on how to use the forward and inverse fast Fourier transform libraries is available [here](https://github.com/RopleyIT/DigitalFilters/blob.master/wiki/ff.md)
+
 ## Footnote
 Please note that this is ongoing work which you are welcome to use, or to make suggestions for improvements. rather than a completed product in support. Once a comprehensive
 set of library classes and methods has been assembled, documentation on how to use the classes will
