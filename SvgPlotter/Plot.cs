@@ -114,9 +114,9 @@ public static class Plot
         return 10 * baseUnit;
     }
 
-    public static Image PlotGraph(List<PointF> points, int width, int height)
+    public static Image PlotGraph(IEnumerable<PointF> points, int width, int height, Color? color = null)
     {
-        List<List<PointF>> pointLists = new() { points };
+        List<IEnumerable<PointF>> pointLists = new() { points };
         return PlotGraphs(pointLists, width, height);
     }
 

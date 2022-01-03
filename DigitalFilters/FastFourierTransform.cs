@@ -19,11 +19,10 @@ namespace DigitalFilters
         /// forward or inverse digital Fourier
         /// transforms
         /// </summary>
-        /// <param name="log2Points"> The log to base 2
-        /// of the number of samples the transform will
-        /// be applied to. In practice this can be any
-        /// integer value from 2 to 16, giving sample
-        /// set sizes of 4 samples up to 65536</param>
+        /// <param name="numSamples"> The number of 
+        /// samples the transform will be applied to. 
+        /// In practice this can be any power of two
+        /// integer value from 4 to 65536</param>
         /// <exception cref="ArgumentException">Thrown
         /// if the argument is not an integer in the
         /// range 2 to 16</exception>

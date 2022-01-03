@@ -114,10 +114,10 @@ namespace SvgPlotter
             return 10 * baseUnit;
         }
 
-        public static string PlotGraph(List<PointF> points, int width, int height)
+        public static string PlotGraph(IEnumerable<PointF> points, int width, int height, string color = null)
         {
-            List<List<PointF>> pointLists = new() { points };
-            return PlotGraphs(pointLists, width, height);
+            List<IEnumerable<PointF>> pointLists = new() { points };
+            return PlotGraphs(pointLists, width, height, color);
         }
 
         private static void PlotGraph(List<PointF> points, SVGCreator svgImage,
