@@ -12,4 +12,5 @@ are at the same frequency as their analogue counterparts
 - Performing forward and inverse fast Fourier transforms
 - Creating waveforms or pulses of various shapes to feed through the filters or transforms
 
-The documentation for these libraries will be found in the [GitHub wiki pages for this project](wiki/).
+The documentation for these libraries will be found in the 
+[GitHub wiki pages for this project](https://github.com/RopleyIT/DigitalFilters/wiki).
