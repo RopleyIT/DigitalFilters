@@ -11,6 +11,7 @@ are at the same frequency as their analogue counterparts
 - Rendering the waveforms output from digital filters either on JPG or SVG files
 - Performing forward and inverse fast Fourier transforms
 - Creating waveforms or pulses of various shapes to feed through the filters or transforms
+- Creating window functions and applying them to waveforms to reduce spectral leakage when applying digital Fourier transforms.
 
 The documentation for these libraries will be found in the 
 [GitHub wiki pages for this project](https://github.com/RopleyIT/DigitalFilters/wiki).
