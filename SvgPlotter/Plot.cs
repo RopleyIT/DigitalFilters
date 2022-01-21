@@ -20,7 +20,7 @@ public static class Plot
     public static Image PlotGraphs(IEnumerable<IEnumerable<PointF>> points, int width, int height, Color? color = null)
     {
         Color[] colours = { Color.Black, Color.Brown, Color.Red, Color.DarkBlue,
-                Color.Green, Color.Blue, Color.Purple, Color.Gray};
+                Color.Green, Color.Magenta, Color.Cyan, Color.Gray};
         if (color.HasValue)
             colours = new Color[] { color.Value };
 

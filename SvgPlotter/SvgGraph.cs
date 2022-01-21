@@ -20,10 +20,18 @@ namespace SvgPlotter
             return new SizeF(scaleX, scaleY);
         }
 
+        private static float ScalePolar(RectangleF bounds, int width, int height)
+        {
+            if (width < height)
+                return height / (2 * bounds.Width);
+            else
+                return height / (2 * bounds.Height);
+        }
+
         public static string PlotGraphs(IEnumerable<IEnumerable<PointF>> points, int width, int height, string color = null)
         {
             string[] colours = { "black", "brown", "red", "darkblue",
-                "green", "blue", "purple", "gray" };
+                "green", "magenta", "cyan", "gray" };
             if (!string.IsNullOrWhiteSpace(color))
                 colours = new string[] { color };
 
@@ -43,6 +51,51 @@ namespace SvgPlotter
             foreach (List<PointF> pl in plots)
                 PlotGraph(pl, svgImage, bounds.Bounds, scale, colours[index++ % colours.Length]);
             return svgImage.ToString();
+        }
+
+        public static string PlotPolarGraphs(IEnumerable<IEnumerable<PointF>> points, int width, int height, string color = null)
+        {
+            string[] colours = { "black", "brown", "red", "darkblue",
+                "green", "magenta", "cyan", "gray" };
+            if (!string.IsNullOrWhiteSpace(color))
+                colours = new string[] { color };
+
+            SVGCreator svgImage = new();
+            svgImage.DocumentDimensions = new Size(width, height);
+            svgImage.ViewBoxDimensions = new RectangleF(-width/2, -height/2,
+                svgImage.DocumentDimensions.Width,
+                svgImage.DocumentDimensions.Height);
+            BoundsF bounds = new();
+            List<List<PointF>> plots = new();
+            foreach (IEnumerable<PointF> pl in points)
+                plots.Add(bounds.Track(pl).ToList());
+            float scale = ScalePolar(bounds.Bounds, width, height);
+
+            PlotPolarAxes(bounds, scale, svgImage);
+            int index = 0;
+            foreach (List<PointF> pl in plots)
+                PlotPolarGraph(pl, svgImage, bounds.Bounds, scale, colours[index++ % colours.Length]);
+            return svgImage.ToString();
+        }
+
+        private static void PlotPolarAxes(BoundsF bounds, float scale, SVGCreator svgImage)
+        {
+            double unitsθ = Math.PI / 6;
+            double unitsR = UnitSize(bounds.Bounds.Height);
+            for(int i = -6; i < 6; i++)
+            for(double angle = -Math.PI; angle < Math.PI; angle += unitsθ)
+            {
+                PointF end = TransformPolar
+                        (new PointF((float)(i*unitsθ), bounds.Bounds.Bottom), bounds.Bounds, scale);
+                svgImage.AddLine(PointF.Empty, end, "gray", 1);
+                LabelPoint(svgImage, i * 30, end);
+            }
+
+            for (double v = RoundUp(bounds.Bounds.Y, unitsR); v <= bounds.Bounds.Bottom; v += unitsR)
+            {
+                svgImage.AddCircle(PointF.Empty, (float)((v - bounds.Bounds.Y) * scale), "gray", 1, null);
+                LabelRRule(v, svgImage, bounds, scale);
+            }
         }
 
         private static void PlotAxes(BoundsF bounds, SizeF scale, SVGCreator svgImage)
@@ -74,30 +127,32 @@ namespace SvgPlotter
 
         private static void LabelXRule(double v, SVGCreator svgImage, BoundsF bounds, SizeF scale)
         {
-            int txtHeight = 20;
-
-            // First generate label string
-
-            string label = v.ToString("G2");
             PointF txtLoc = TransformPt(new PointF((float)v, 0), bounds.Bounds, scale);
-            txtLoc.X += txtHeight / 2;
-            txtLoc.Y -= txtHeight / 2;
-            svgImage.AddText(label, txtLoc,
-                $"{txtHeight}px", "sans-serif", false, false, "gray");
+            LabelPoint(svgImage, v, txtLoc);
         }
 
         private static void LabelYRule(double v, SVGCreator svgImage, BoundsF bounds, SizeF scale)
         {
-            int txtHeight = 20;
-
-            // First generate label string
-
-            string label = v.ToString("G3");
             PointF txtLoc = TransformPt(new PointF(0, (float)v), bounds.Bounds, scale);
-            txtLoc.X += txtHeight / 2;
-            txtLoc.Y -= txtHeight / 2;
-            svgImage.AddText(label, txtLoc,
-                $"{txtHeight}px", "sans-serif", false, false, "gray");
+            LabelPoint(svgImage, v, txtLoc);
+        }
+
+        private static void LabelRRule(double v, SVGCreator svgImage, BoundsF bounds, float scale)
+        {
+            PointF txtLoc = TransformPolar(new PointF(0, (float)v), bounds.Bounds, scale);
+            LabelPoint(svgImage, v, txtLoc);
+        }
+
+        private static void LabelPoint(SVGCreator svgImage, double v, PointF location)
+            => LabelPoint(svgImage, v.ToString("G3"), location);
+
+        private static void LabelPoint(SVGCreator svgImage, string label, PointF location)
+        {
+            int txtHeight = 20;
+            location.X += txtHeight / 2;
+            location.Y -= txtHeight / 2;
+            svgImage.AddText
+                (label, location, $"{txtHeight}px", "sans-serif", false, false, "gray");
         }
 
         private static double RoundUp(double x, double unitsX) => Math.Ceiling(x / unitsX) * unitsX;
@@ -131,8 +186,26 @@ namespace SvgPlotter
             path.Join = LineJoin.Round;
         }
 
+        private static void PlotPolarGraph(List<PointF> points, SVGCreator svgImage,
+            RectangleF bounds, float scale, string penColor)
+        {
+            var transformedPoints =
+                from p in points
+                select TransformPolar(p, bounds, scale);
+            var path = svgImage.AddPolyline(transformedPoints, penColor, 2);
+            path.Cap = LineCap.Round;
+            path.Join = LineJoin.Round;
+        }
+
         private static PointF TransformPt(PointF p, RectangleF bounds, SizeF scale) 
             => new((float)(scale.Width * (p.X - bounds.X)),
                 (float)(scale.Height * (bounds.Height - p.Y + bounds.Y)));
+
+        private static PointF TransformPolar(PointF p, RectangleF bounds, float scale)
+        {
+            float radius = scale * (p.Y - bounds.Y);
+            float angle = p.X;
+            return new PointF((float)(radius * Math.Cos(angle)), (float)(-radius * Math.Sin(angle)));
+        }
     }
 }

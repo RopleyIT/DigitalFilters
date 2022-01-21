@@ -1,9 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageTags>Digital filters; Electonics; Signal Processing; DSP; FFT; Fourier Transform;</PackageTags>
+    <PackageReleaseNotes>First public release of digital signal processing library for dotNET.</PackageReleaseNotes>
+    <AssemblyVersion>1.22.1.7</AssemblyVersion>
+    <FileVersion>1.22.1.7</FileVersion>
+    <Authors>Sean D Smith</Authors>
+    <Company>Ropley IT Ltd</Company>
+    <Description>Digital signal processing libraries</Description>
+    <Copyright>Ropley IT Ltd</Copyright>
+    <PackageProjectUrl>https://github.com/RopleyIT/DigitalFilters/wiki</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/RopleyIT/DigitalFilters</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
