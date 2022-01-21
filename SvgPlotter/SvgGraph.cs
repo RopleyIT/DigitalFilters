@@ -23,7 +23,7 @@ namespace SvgPlotter
         private static float ScalePolar(RectangleF bounds, int width, int height)
         {
             if (width < height)
-                return height / (2 * bounds.Width);
+                return width / (2 * bounds.Height);
             else
                 return height / (2 * bounds.Height);
         }
@@ -83,12 +83,12 @@ namespace SvgPlotter
             double unitsθ = Math.PI / 6;
             double unitsR = UnitSize(bounds.Bounds.Height);
             for(int i = -6; i < 6; i++)
-            for(double angle = -Math.PI; angle < Math.PI; angle += unitsθ)
             {
                 PointF end = TransformPolar
                         (new PointF((float)(i*unitsθ), bounds.Bounds.Bottom), bounds.Bounds, scale);
                 svgImage.AddLine(PointF.Empty, end, "gray", 1);
-                LabelPoint(svgImage, i * 30, end);
+                if(i != 0)
+                    LabelPoint(svgImage, i * 30, end);
             }
 
             for (double v = RoundUp(bounds.Bounds.Y, unitsR); v <= bounds.Bounds.Bottom; v += unitsR)

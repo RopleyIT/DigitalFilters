@@ -3,7 +3,7 @@ using SvgPlotter;
 using System.Drawing;
 using System.Numerics;
 
-List<PointF> polarPts = new List<PointF>();
+List<PointF> polarPts = new ();
 polarPts.Add(new PointF(0, -4));
 polarPts.Add(new PointF(0.5F, 0));
 polarPts.Add(new PointF(1, 3));
@@ -11,8 +11,12 @@ polarPts.Add(new PointF(1.5F, 4));
 polarPts.Add(new PointF(2, 3));
 polarPts.Add(new PointF(2.5F, 2.5F));
 polarPts.Add(new PointF(3, 2));
-List<List<PointF>> ptSets = new List<List<PointF>>();
+List<List<PointF>> ptSets = new ();
 ptSets.Add(polarPts);
+
+Image polarPlot = Plot.PlotPolarGraphs(ptSets, 1920, 1080);
+polarPlot.Save("C:\\tmp\\polar.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+
 string svgPolarPlot = SvgGraph.PlotPolarGraphs(ptSets, 1920, 1080);
 using StreamWriter spw = new("C:\\tmp\\polar.svg");
 spw.Write(svgPolarPlot);
