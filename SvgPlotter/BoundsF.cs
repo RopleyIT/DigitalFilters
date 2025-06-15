@@ -43,5 +43,6 @@ public class BoundsF
     /// Generate the calculated bounding box around the points
     /// </summary>
 
-    public RectangleF Bounds => new(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
+    public RectangleF Bounds => new(topLeft.X, topLeft.Y, 
+        bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
 }

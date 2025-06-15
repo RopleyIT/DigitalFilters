@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgPlotter", "SvgPlotter.csproj", "{711E1404-B6EE-F606-D7FD-CAED871D6E9F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{711E1404-B6EE-F606-D7FD-CAED871D6E9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{711E1404-B6EE-F606-D7FD-CAED871D6E9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{711E1404-B6EE-F606-D7FD-CAED871D6E9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{711E1404-B6EE-F606-D7FD-CAED871D6E9F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8557347C-0E99-42BC-B7CF-9BD9643D7316}
+	EndGlobalSection
+EndGlobal

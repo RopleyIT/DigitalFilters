@@ -49,7 +49,7 @@ namespace DigitalFilters
         {
             for (int i = 0; i < duration; i++)
                 yield return magnitude * Math.Sin
-                    (2 * Math.PI * (phase / 360.0 +  i * frequency / sampleRate));
+                    (2 * Math.PI * (phase / 360.0 +  i * frequency / (double)sampleRate));
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace DigitalFilters
         
         /// <summary>
         /// Given two input sequences, create an output sequence that is the product
-        /// of rresponding samples from the two source sequences.
+        /// of corresponding samples from the two source sequences.
         /// </summary>
         /// <param name="src1">The first input sequence</param>
         /// <param name="src2">The second input sequence</param>
