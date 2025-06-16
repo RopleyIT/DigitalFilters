@@ -36,6 +36,22 @@ using StreamWriter sw = new($"C:\\tmp\\spectrum{whichPulse}.svg");
 sw.Write(svgPlot);
 sw.Close();
 
+// Polar plot demo
+
+List<Coordinate> polarPoints = new();
+for(double theta = - Math.PI; theta < Math.PI; theta += Math.PI/120)
+{
+    double r =  theta == 0 ? 1.0 : Math.Sin(5 * theta)/(5*theta);
+    polarPoints.Add(new Coordinate(theta, r));
+}
+
+string svgPolar = SVGPlot.PlotPolarGraphs([polarPoints], 1024, 1024, "red");
+using (StreamWriter swp = new($"C:\\tmp\\polar.svg"))
+{
+    swp.Write(svgPolar);
+    swp.Close();
+}
+
 // Pitch shifting demo
 
 input = SignalSources.SineWave(261, 0, 44100, 88200).ToList();
