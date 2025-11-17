@@ -22,7 +22,12 @@ namespace DigitalFilters
         /// <param name="numSamples"> The number of 
         /// samples the transform will be applied to. 
         /// In practice this can be any power of two
-        /// integer value from 4 to 65536</param>
+        /// integer value from 4 to 65536. Important
+        /// note: Forward transforms take twice this
+        /// number of real samples to create this
+        /// number of complex frequency samples.
+        /// Hence for an input array of 128 time
+        /// domain samples, specify a value of 64.</param>
         /// <exception cref="ArgumentException">Thrown
         /// if the argument is not an integer in the
         /// range 2 to 16</exception>
@@ -113,7 +118,7 @@ namespace DigitalFilters
         /// time domain
         /// </summary>
         /// <param name="input">The set of complex frequency/phase
-        /// samples to transfirm back to the time domain. If this is
+        /// samples to transform back to the time domain. If this is
         /// the same length as expected in the constructor, the
         /// complex frequency samples are expected to be paired,
         /// i.e. sample[length-i] is the complex conjugate of
@@ -134,9 +139,11 @@ namespace DigitalFilters
         {
             Complex[] freqSamples;
             if (!TwiddleFactors.IsPositivePowerOfTwo(input.Length - 1))
-                throw new ArgumentException("Frequency samples must be 2^N + 1 in length");
+                throw new ArgumentException
+                    ("Frequency samples must be 2^N + 1 in length");
             if (input.Length >= Twiddles.Resolution)
-                throw new ArgumentException("Twiddle factors too coarse for this number of samples");
+                throw new ArgumentException
+                    ("Twiddle factors too coarse for this number of samples");
             freqSamples = new Complex[(input.Length - 1) << 1];
             Array.Copy(input, freqSamples, input.Length);
             for (int i = 1; i < input.Length - 1; i++)

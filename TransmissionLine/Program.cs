@@ -71,6 +71,21 @@ using StreamWriter sps = new($"C:\\tmp\\shift.svg");
 sps.Write(svgPlot);
 sps.Close();
 
+// FFT demo
+
+FastFourierTransform fft = new(256);
+double[] inputWindowed = WindowFunction.ApplyWindow(input, WindowFunction.Hamming, 512).ToArray();
+var inputFreqDomain = fft.ForwardTransform(inputWindowed);
+List<List<Coordinate>> freqPlots = new();
+freqPlots.Add(new List<Coordinate>(inputFreqDomain.Select((p, i) => new Coordinate(i * 44100.0 / 32768, p.Magnitude))));
+double[] outputWindowed = WindowFunction.ApplyWindow(output.Skip(65), WindowFunction.Hamming, 512).ToArray();
+var outputFreqDomain = fft.ForwardTransform(outputWindowed);
+freqPlots.Add(new List<Coordinate>(outputFreqDomain.Select((p, i) => new Coordinate(i * 44100.0 / 32768, p.Magnitude))));
+svgPlot = SVGPlot.PlotGraphs(freqPlots, 2 * 1920, 1080);
+StreamWriter spf = new("C:\\tmp\\fft.svg");
+spf.Write(svgPlot);
+spf.Close();
+
 // .WAV file writing demo
 
 WavWriter w = new WavWriter("C:\\tmp\\shift.wav", 44100, 1, 32);

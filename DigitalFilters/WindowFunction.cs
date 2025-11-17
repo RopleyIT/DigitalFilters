@@ -23,23 +23,23 @@ namespace DigitalFilters
         /// other than at sample intervals can be obtained, as is
         /// useful when interpolating waveforms for pitch shifting.</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals. Note that from edge to edge,
-        /// there are maxSamples + 1 smaple points for a symmetrical
+        /// as a multiple of sample intervals. Note that from edge to edge,
+        /// there are maxSamples + 1 sample points for a symmetrical
         /// window. Hence choosing a value of 4 would give the edge
-        /// values at smaples 0 and 4, and the centre peak value at 2.
+        /// values at samples 0 and 4, and the centre peak value at 2.
         /// If an odd value is chosen for maxSamples, the mid-point
         /// of the window function does not align with any sample
         /// point, but the two highest values are either side of half
-        /// way through the list of smaples. For example, a maxSamples
-        /// value of 5 will have equal max value smaples at smaples
+        /// way through the list of samples. For example, a maxSamples
+        /// value of 5 will have equal max value samples at samples
         /// 2 and 3.</param>
         /// <param name="a0">DC component amplitude of window function</param>
         /// <param name="a1">Fundamental one-cycle amplitude</param>
         /// <param name="a2">First harmonic amplitude</param>
         /// <param name="a3">2nd harmonic amplitude</param>
-        /// <returns>The window function value for the specified smaple</returns>
+        /// <returns>The window function value for the specified sample</returns>
         
-        private static double ApplyWindow
+        private static double CalcWindowEnvelope
             (double sample, int maxSamples, double a0, double a1, double a2 = 0, double a3 = 0)
         {
             if (sample < 0 || sample > maxSamples)
@@ -62,11 +62,11 @@ namespace DigitalFilters
         /// <param name="sample">The ofset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double Hann(double sample, int maxSamples)
-            => ApplyWindow(sample, maxSamples, 0.5, 0.5);
+            => CalcWindowEnvelope(sample, maxSamples, 0.5, 0.5);
 
         /// <summary>
         /// Window function for a Hamming window.
@@ -80,11 +80,11 @@ namespace DigitalFilters
         /// <param name="sample">The offset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double Hamming(double sample, int maxSamples)
-            => ApplyWindow(sample, maxSamples, 0.53836, 0.46164);
+            => CalcWindowEnvelope(sample, maxSamples, 0.53836, 0.46164);
 
         /// <summary>
         /// Window function for a Blackman window.
@@ -98,11 +98,11 @@ namespace DigitalFilters
         /// <param name="sample">The offset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double Blackman(double sample, int maxSamples)
-            => ApplyWindow(sample, maxSamples, 0.42, 0.5, 0.08);
+            => CalcWindowEnvelope(sample, maxSamples, 0.42, 0.5, 0.08);
 
         /// <summary>
         /// Window function for an exact Blackman window.
@@ -115,11 +115,11 @@ namespace DigitalFilters
         /// <param name="sample">The offset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double ExactBlackman(double sample, int maxSamples)
-            => ApplyWindow(sample, maxSamples, 0.42659, 0.49656, 0.076849);
+            => CalcWindowEnvelope(sample, maxSamples, 0.42659, 0.49656, 0.076849);
 
         /// <summary>
         /// Window function for a Nuttall window.
@@ -131,11 +131,11 @@ namespace DigitalFilters
         /// <param name="sample">The offset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double Nuttall(double sample, int maxSamples)
-            => ApplyWindow
+            => CalcWindowEnvelope
             (sample, maxSamples, 0.355768, 0.487396, 0.144232, 0.012604);
 
         /// <summary>
@@ -148,11 +148,11 @@ namespace DigitalFilters
         /// <param name="sample">The offset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double BlackmanNuttall(double sample, int maxSamples)
-            => ApplyWindow
+            => CalcWindowEnvelope
             (sample, maxSamples, 0.3635819, 0.4891775, 0.1365995, 0.0106411);
 
         /// <summary>
@@ -166,11 +166,24 @@ namespace DigitalFilters
         /// <param name="sample">The offset into the window function as a count
         /// of sample intervals</param>
         /// <param name="maxSamples">The length of the window function
-        /// as a multiple of smaple intervals.</param
+        /// as a multiple of sample intervals.</param
         /// <returns>The window function value for the specified sample</returns>
 
         public static double BlackmanHarris(double sample, int maxSamples)
-            => ApplyWindow
+            => CalcWindowEnvelope
             (sample, maxSamples, 0.35875, 0.48829, 0.14128, 0.01168);
+
+        /// <summary>
+        /// Apply a window funcion to a sequence of real samples
+        /// </summary>
+        /// <param name="input">The sequence of input samples</param>
+        /// <param name="windowFunction">The chosen window function</param>
+        /// <param name="maxSamples">The width of the window in samples</param>
+        /// <returns>The windowed sample set</returns>
+        
+        public static IEnumerable<double> ApplyWindow(IEnumerable<double> input,
+            Func<double, int, double> windowFunction, int maxSamples) 
+            => input.Take(maxSamples)
+                .Select((s, i) => s * windowFunction(i, maxSamples));
     }
 }
