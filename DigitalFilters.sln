@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31919.166
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalFilters", "DigitalFilters\DigitalFilters.csproj", "{84DB67CF-B270-4C05-815A-965B6201D5E0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalFilterTests", "DigitalFilterTests\DigitalFilterTests.csproj", "{D28DAAA6-B763-4766-86C4-1A312E9924A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Filter", "Filter\Filter.csproj", "{8D3938EE-62FD-41D2-A6D0-4CEEE64C5B19}"
 EndProject
@@ -19,7 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plotter", "..\SVGPlotLib\Pl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwoDimensionLib", "..\SVGPlotLib\TwoDimensionLib\TwoDimensionLib.csproj", "{D520E598-514E-22FD-8496-BAE5A1784423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwoDLibTests", "..\SVGPlotLib\TwoDLibTests\TwoDLibTests.csproj", "{8361FE2C-CFB5-EA3E-4E02-671EA0A743D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalFilterMsTests", "DigitalFilterMsTests\DigitalFilterMsTests.csproj", "{B7DF4C95-649B-4E4C-BE72-EAF4BE058501}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwoDLibMsTests", "TwoDLibMsTests\TwoDLibMsTests.csproj", "{08BEA46D-FAB7-4FBB-97F6-147FD82A4730}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,10 +31,6 @@ Global
 		{84DB67CF-B270-4C05-815A-965B6201D5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84DB67CF-B270-4C05-815A-965B6201D5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84DB67CF-B270-4C05-815A-965B6201D5E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D28DAAA6-B763-4766-86C4-1A312E9924A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D28DAAA6-B763-4766-86C4-1A312E9924A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D28DAAA6-B763-4766-86C4-1A312E9924A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D28DAAA6-B763-4766-86C4-1A312E9924A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8D3938EE-62FD-41D2-A6D0-4CEEE64C5B19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8D3938EE-62FD-41D2-A6D0-4CEEE64C5B19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D3938EE-62FD-41D2-A6D0-4CEEE64C5B19}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -59,10 +55,14 @@ Global
 		{D520E598-514E-22FD-8496-BAE5A1784423}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D520E598-514E-22FD-8496-BAE5A1784423}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D520E598-514E-22FD-8496-BAE5A1784423}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8361FE2C-CFB5-EA3E-4E02-671EA0A743D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8361FE2C-CFB5-EA3E-4E02-671EA0A743D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8361FE2C-CFB5-EA3E-4E02-671EA0A743D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8361FE2C-CFB5-EA3E-4E02-671EA0A743D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7DF4C95-649B-4E4C-BE72-EAF4BE058501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7DF4C95-649B-4E4C-BE72-EAF4BE058501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7DF4C95-649B-4E4C-BE72-EAF4BE058501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7DF4C95-649B-4E4C-BE72-EAF4BE058501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08BEA46D-FAB7-4FBB-97F6-147FD82A4730}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08BEA46D-FAB7-4FBB-97F6-147FD82A4730}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08BEA46D-FAB7-4FBB-97F6-147FD82A4730}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08BEA46D-FAB7-4FBB-97F6-147FD82A4730}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
